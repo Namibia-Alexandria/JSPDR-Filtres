@@ -1,0 +1,44 @@
+; IrfanView IJC Sandbox Filter
+; Name: Chroma UV Distortion
+; Author: Jean Scotti Pierre Doce Rainme
+
+[INFO]
+Name=Chroma UV Distortion
+Author=Jean Scotti Pierre Doce Rainme
+Description=Chroma-based UV displacement distortion
+
+[PARAMETERS]
+Amplitude=FLOAT,0,50,10
+Chroma=FLOAT,0,6.284,3.142
+Distortion=FLOAT,0,100,50
+
+[PROCESS]
+; normalize coordinates
+u = x / width
+v = y / height
+
+; chroma phase
+phase = Chroma
+
+; sine-based UV distortion
+du = sin(v * Distortion + phase) * Amplitude
+dv = cos(u * Distortion + phase) * Amplitude
+
+; apply UV offset
+sx = clamp(x + du, 0, width - 1)
+sy = clamp(y + dv, 0, height - 1)
+
+; sample source
+r = src_r(sx, sy)
+g = src_g(sx, sy)
+b = src_b(sx, sy)
+
+; chroma separation
+cr = r
+cg = g * (0.5 + 0.5 * sin(phase))
+cb = b * (0.5 + 0.5 * cos(phase))
+
+; output
+dst_r = cr
+dst_g = cg
+dst_b = cb
